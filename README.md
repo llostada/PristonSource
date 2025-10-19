@@ -9,8 +9,4 @@ This code was used in the following PristonTale servers:
 - Epic Tale
 
 Thanks:
-- Joao "Prog" Vitor (HiddenUserHere)
-- Igor Segalla (Slave)
-- Adolpho Pizzolio (HaDDeR)
-- Gabriel "Rovug" Romanzini
-- Leonardo "Lee" Souza
+- Eu, porque fiz isso funcionar (em partes)
