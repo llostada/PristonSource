@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <SHARED_DIR>E:\Pristontale\PTEUREVAMPED\Source Viet\shared</SHARED_DIR>
+  </PropertyGroup>
+  <PropertyGroup />
+	<!-- ADICIONE ESTE BLOCO -->
+	<ItemDefinitionGroup>
+		<ClCompile>
+			<!-- Inclui a pasta shared e mantém quaisquer outros includes já herdados -->
+			<AdditionalIncludeDirectories>
+				$(SHARED_DIR);
+				$(ProjectDir)..\..\shared;
+				$(ProjectDir)..\..\shared\**;
+				%(AdditionalIncludeDirectories)
+			</AdditionalIncludeDirectories>
+		</ClCompile>
+	</ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="SHARED_DIR">
+      <Value>$(SHARED_DIR)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

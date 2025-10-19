@@ -1,0 +1,65 @@
+diff --git a/shared/def.h b/shared/def.h
+index 5d1eabc..e2f9c32 100644
+--- a/shared/def.h
++++ b/shared/def.h
+@@ -1,9 +1,24 @@
+ #pragma once
+ 
+-// Salto indireto antigo:
+-// #define JMP( pointer ) { __asm { __asm MOV EAX, pointer __asm JMP EAX } }
++// ---------------------------------------------------------------------------
++// Saltos compatíveis com MSVC inline asm
++// ---------------------------------------------------------------------------
++//  - JMP_IMM(addr): addr é um imediato/constante (ex.: 0x0043CB20)
++//  - JMP_VAR(sym) : sym é uma VARIÁVEL DWORD que guarda o endereço alvo
++//
++// Obs: Evitamos referenciar membros estáticos C++ diretamente no asm
++//      (nome decorado). Use um símbolo C (global) como ponte e JMP_VAR.
++// ---------------------------------------------------------------------------
++
++// Salto para IMEDIATO (constante)
++#define JMP_IMM(addr)            { __asm { mov eax, addr           } __asm { jmp eax } }
++
++// Salto para VARIÁVEL (carrega DWORD contido em [sym] e salta)
++#define JMP_VAR(sym)             { __asm { mov eax, dword ptr [sym] } __asm { jmp eax } }
+ 
+ // Atalhos de instrução
+ #define NAKED                    __declspec(naked)
+ #define STDCALL                  __stdcall
+ #define THISCALL                 __thiscall
+diff --git a/shared/unit.cpp b/shared/unit.cpp
+index 7c2a4f1..c3b9d77 100644
+--- a/shared/unit.cpp
++++ b/shared/unit.cpp
+@@ -1,9 +1,28 @@
+ #include "stdafx.h"
+ #include "unit.h"
+ #include "def.h"
+ 
++// ----------------------------------------------------------------------------
++// Aliases C globais para usar em inline asm (evitar nome C++ decorado)
++// Cada alias recebe o valor do membro estático correspondente.
++// Adicione novos conforme for precisando em outros JMPs.
++// ----------------------------------------------------------------------------
++#if defined(_GAME) || defined(_SERVER)
++DWORD g_pfnMain = 0;      // alias para UnitData::pfnMain
++#endif
++
++// Inicializa os aliases (chamado em carga do módulo)
++static struct _UnitAsmAliasInit {
++    _UnitAsmAliasInit() {
++#if defined(_GAME) || defined(_SERVER)
++        g_pfnMain = UnitData::pfnMain;
++#endif
++    }
++} _unitAsmAliasInit;
++
+ // ---------------------------------------------------------
+ // UnitData::Main (NAKED): salta para a função original
+ // ---------------------------------------------------------
+ NAKED void UnitData::Main()
+ {
+-    JMP( pfnMain );
++    // Salta usando variável-alvo (conteúdo de g_pfnMain)
++    JMP_VAR( g_pfnMain );
+ }

@@ -1,0 +1,39 @@
+*** PATCH ***
+*** 1,40 ****
+  #include "stdafx.h"
+  #include "unit.h"
+  #include "def.h"
+  
+- // ---------------------------------------------------------
+- // UnitData::Main (NAKED): salta para a função original
+- // ---------------------------------------------------------
+- NAKED void UnitData::Main()
+- {
+-     JMP( pfnMain );
+- }
++ // ----------------------------------------------------------------------------
++ // Aliases C globais para usar em inline asm (evitar nome C++ decorado)
++ // Cada alias recebe o valor do membro estático correspondente.
++ // ----------------------------------------------------------------------------
++ #if defined(_GAME) || defined(_SERVER)
++ DWORD g_pfnMain = 0;      // alias para UnitData::pfnMain
++ #endif
++ 
++ // Inicializa os aliases (em carga do módulo)
++ static struct _UnitAsmAliasInit {
++     _UnitAsmAliasInit() {
++ #if defined(_GAME) || defined(_SERVER)
++         g_pfnMain = UnitData::pfnMain;
++ #endif
++     }
++ } _unitAsmAliasInit;
++ 
++ // ---------------------------------------------------------
++ // UnitData::Main (NAKED): salta para a função original
++ // ---------------------------------------------------------
++ NAKED void UnitData::Main()
++ {
++     // Salta usando variável-alvo (conteúdo de g_pfnMain)
++     JMP_VAR( g_pfnMain );
++ }
+*** END PATCH ***
