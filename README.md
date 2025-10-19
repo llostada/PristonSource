@@ -9,4 +9,4 @@ This code was used in the following PristonTale servers:
 - Epic Tale
 
 Thanks:
-- Eu, porque fiz isso funcionar (em partes)
+- Eu, porque fiz isso funcionar (em partes) - teste
